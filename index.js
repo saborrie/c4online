@@ -51,6 +51,17 @@ io.on('connection', function (socket) {
     socket.on('fetch', function () {
         sendBoard(socket);
     });
+
+    socket.on('reset', function () {
+        board = [];
+        for(var i=0; i<6; i++) {
+            board[i] = [];
+            for(var j=0; j<7; j++) {
+                board[i][j] = "E";
+            }
+        }
+        sendBoard(socket);
+    });
   
     socket.on('newMove', function (move, callback) {
 

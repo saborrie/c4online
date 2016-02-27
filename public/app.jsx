@@ -23,6 +23,9 @@ var App = React.createClass({
             callback();
         });
     },
+    reset: function() {
+        this.socket.emit('reset');
+    },
     makeMove: function (column, callback) {
         this.socket.emit('newMove', {column: column}, function (err) {
             if (err)
@@ -33,7 +36,7 @@ var App = React.createClass({
     render: function() {
         return (
             <div className="app">
-                <Board board={this.state.board} makeMove={this.makeMove}/>
+                <Board board={this.state.board} reset={this.reset} makeMove={this.makeMove}/>
             </div>
         );
 
@@ -43,6 +46,9 @@ var App = React.createClass({
 
 
 var Board = React.createClass({
+    reset: function() {
+        this.props.reset();
+    },
     render: function () {
         var board = (<div>Loading board...</div>);
         var that = this;
@@ -63,6 +69,7 @@ var Board = React.createClass({
         return (
             <div className="board">
                 {board}
+                <a onClick={this.reset}>reset</a>
             </div>
         );
     }
