@@ -1,0 +1,55 @@
+body {
+    background: #ddd;
+    padding: 0;
+    margin: 0;
+}
+
+.hole {
+    width: 80px;
+    height: 80px;
+    border: 1px solid black;
+    display: inline-block;
+}
+
+.hole .red, .hole .yellow {
+    width: 100%;
+    height: 100%;
+}
+
+.hole .red {
+    background: red;
+}
+
+
+.hole .yellow {
+    background: orange;
+}
+
+#content {
+    background: white;
+    padding: 50px;
+    width: 600px;
+    margin: auto;
+}
+
+.comment {
+    border: 1px #ddd solid;
+    padding: 20px;
+}
+.comment .author {
+    font-weight: bold;
+}
+.comment .body {
+    padding-top: 5px;
+}
+
+.commentForm {
+    margin-top: 20px;
+}
+.commentForm input,
+.commentForm textarea {
+    width: 100%;
+    margin-bottom: 5px;
+    border: 1px #ddd solid;
+    padding: 5px;
+}
