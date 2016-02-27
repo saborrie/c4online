@@ -34,7 +34,7 @@ body {
 
 .comment {
     border: 1px #ddd solid;
-    padding: 20px;
+    padding: 2px;
 }
 .comment .author {
     font-weight: bold;

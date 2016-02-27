@@ -26,16 +26,19 @@ var users = [];
 var usercounter = 0;
 turn = "red";
 
-// var sendComments = function (socket) {
-//     fs.readFile('_comments.json', 'utf8', function(err, comments) {
-//         comments = JSON.parse(comments);
-//         socket.emit('comments', comments);
-//     });
-// };
+var sendMessages = function (socket) {
+    fs.readFile('_messages.json', 'utf8', function(err, messages) {
+        messages = JSON.parse(messages);
+        socket.emit('messages', messages);
+    });
+};
 
-var sendBoard = function (socket) {
+var sendBoard = function (user) {
     io.emit('board', board);
-    // socket.broadcast.emit('board', board);
+};
+
+var sendId = function (user) {
+    user.socket.emit('id', user.id);
 };
 
 io.on('connection', function (socket) {
@@ -45,11 +48,13 @@ io.on('connection', function (socket) {
         id: usercounter++,
         socket: socket
     };
-    users.push(user);
 
-    
+    sendId(user);
+    sendBoard(user);
+
     socket.on('fetch', function () {
         sendBoard(socket);
+        sendMessages(socket);
     });
 
     socket.on('reset', function () {
@@ -79,18 +84,19 @@ io.on('connection', function (socket) {
         users.pop(user);
     });
 
-    // socket.on('fetchComments', function () {
-    //     sendComments(socket);
-    // });
+    socket.on('fetchComments', function () {
+        sendComments(socket);
+    });
 
-    // socket.on('newComment', function (comment, callback) {
-    //     fs.readFile('_comments.json', 'utf8', function(err, comments) {
-    //         comments = JSON.parse(comments);
-    //         comments.push(comment);
-    //         fs.writeFile('_comments.json', JSON.stringify(comments, null, 4), function (err) {
-    //             io.emit('comments', comments);
-    //             callback(err);
-    //         });
-    //     });
-    // });
+    socket.on('newMessage', function (text, callback) {
+        fs.readFile('_messages.json', 'utf8', function(err, messages) {
+            messages = JSON.parse(messages);
+            messages.push({ author: user.id, text: text });
+            messages = messages.slice(-10);
+            fs.writeFile('_messages.json', JSON.stringify(messages, null, 4), function (err) {
+                io.emit('messages', messages);
+                callback(err);
+            });
+        });
+    });
 });

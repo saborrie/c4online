@@ -1,6 +1,7 @@
 var App = React.createClass({
     getInitialState: function () {
         return {
+            id: null,
             board: null,
             messages: []
         };
@@ -11,13 +12,17 @@ var App = React.createClass({
         this.socket.on('board', function (board) {
             that.setState({ board: board });
         });
-        this.socket.on('messageChange', function (messages) {
+        this.socket.on('id', function (id) {
+            that.setState({ id: id });
+        });
+
+        this.socket.on('messages', function (messages) {
             that.setState({ messages: messages });
         });
         this.socket.emit('fetch');
     },
-    sendMessage: function (message, callback) {
-        this.socket.emit('newMessage', message, function (err) {
+    sendMessage: function (text, callback) {
+        this.socket.emit('newMessage', text, function (err) {
             if (err)
                 return console.error('New message error:', err);
             callback();
@@ -36,11 +41,12 @@ var App = React.createClass({
     render: function() {
         return (
             <div className="app">
+                <div>You are player {this.state.id}.</div>
                 <Board board={this.state.board} reset={this.reset} makeMove={this.makeMove}/>
+                <ChatSection messages={this.state.messages} sendMessage={this.sendMessage}/>
             </div>
         );
 
-        // <ChatSection messages={this.state.messages} sendMessage={this.sendMessage}/>
     }
 });
 
@@ -86,71 +92,62 @@ var Hole = React.createClass({
     }
 });
 
-// var ChatSection = React.createClass({
-//     render: function () {
-//         return (<div className="chatsection">
-//             <h3>Connect 4:</h3>
-//             <Board board={this.props.board} makeMove={this.makeMove}/>
-//             <ChatSection sendMessage={this.sendMessage}/>
-//         </div>);
-//     }
-// });
+var ChatSection = React.createClass({
+    render: function () {
+        return (<div className="chatsection">
+            <h3>Connect 4 chat:</h3>
+            <ChatForm sendMessage={this.props.sendMessage}/>
+            <MessageList messages={this.props.messages}/>
+        </div>);
+    }
+});
 
 
-// var MessageList = React.createClass({
-//     render: function () {
-//         var Comments = (<div>Loading comments...</div>);
-//         if (this.props.comments) {
-//             Comments = this.props.comments.map(function (comment) {
-//                 return (<Comment comment={comment} />);
-//             });
-//         }
-//         return (
-//             <div className="commentList">
-//                 {Comments}
-//             </div>
-//         );
-//     }
-// });
+var MessageList = React.createClass({
+    render: function () {
+        var messages = (<div>Loading messages...</div>);
+        if (this.props.messages) {
+            messages = this.props.messages.map(function (message) {
+                return (<Message message={message} />);
+            });
+        }
+        return (
+            <div className="messageslist">
+                {messages.reverse()}
+            </div>
+        );
+    }
+});
 
 
-// var Comment = React.createClass({
-//     render: function () {
-//         return (
-//             <div className="comment">
-//                 <span className="author">{this.props.comment.author}</span> said:<br/>
-//                 <div className="body">{this.props.comment.text}</div>
-//             </div>
-//         );
-//     }
-// });
-// var CommentForm = React.createClass({
-//     handleSubmit: function (e) {
-//         e.preventDefault();
-//         var that = this;
-//         var author = this.refs.author.getDOMNode().value;
-//         var text = this.refs.text.getDOMNode().value;
-//         var comment = { author: author, text: text };
-//         var submitButton = this.refs.submitButton.getDOMNode();
-//         submitButton.innerHTML = 'Posting comment...';
-//         submitButton.setAttribute('disabled', 'disabled');
-//         this.props.submitComment(comment, function (err) {
-//             that.refs.author.getDOMNode().value = '';
-//             that.refs.text.getDOMNode().value = '';
-//             submitButton.innerHTML = 'Post comment';
-//             submitButton.removeAttribute('disabled');
-//         });
-//     },
-//     render: function () {
-//         return (
-//             <form className="commentForm" onSubmit={this.handleSubmit}>
-//                 <input type="text" name="author" ref="author" placeholder="Name" required /><br/>
-//                 <textarea name="text" ref="text" placeholder="Comment" required></textarea><br/>
-//                 <button type="submit" ref="submitButton">Post comment</button>
-//             </form>
-//         );
-//     }
-// });
+var Message = React.createClass({
+    render: function () {
+        return (
+            <div className="comment">
+                <div className="body">{this.props.message.author}: {this.props.message.text}</div>
+            </div>
+        );
+    }
+});
+
+
+var ChatForm = React.createClass({
+    handleSubmit: function (e) {
+        e.preventDefault();
+        var that = this;
+        var text = this.refs.text.getDOMNode().value;
+        this.props.sendMessage(text, function (err) {
+            that.refs.text.getDOMNode().value = '';
+        });
+    },
+    render: function () {
+        return (
+            <form className="commentForm" onSubmit={this.handleSubmit}>
+                <input type="text" name="author" ref="text" placeholder="send a message" required /><br/>
+            </form>
+        );
+    }
+});
 
 React.render(
     <App/>,
