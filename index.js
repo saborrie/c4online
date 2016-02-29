@@ -29,7 +29,11 @@ turn = "red";
 var sendMessages = function (socket) {
     fs.readFile('_messages.json', 'utf8', function(err, messages) {
         messages = JSON.parse(messages);
-        socket.emit('messages', messages);
+        messages = messages.map(function(message) {
+            message.colour = message.author == user.id ? "sent" : "received";
+            return message;
+        });
+        user.socket.emit('messages', messages);
     });
 };
 
@@ -51,10 +55,16 @@ io.on('connection', function (socket) {
 
     sendId(user);
     sendBoard(user);
+    sendMessages(user);
 
-    socket.on('fetch', function () {
-        sendBoard(socket);
-        sendMessages(socket);
+    user.socket.on('fetch', function () {
+        sendId(user);
+        sendBoard(user);
+        sendMessages(user);
+    });
+
+    user.socket.on('fetchmessages', function () {
+        sendMessages(user);
     });
 
     socket.on('reset', function () {
@@ -68,7 +78,7 @@ io.on('connection', function (socket) {
         sendBoard(socket);
     });
   
-    socket.on('newMove', function (move, callback) {
+    user.socket.on('newMove', function (move, callback) {
 
         for(var row=0; row<6; row++) {
             if(board[row][move.column] == "E") {
@@ -80,21 +90,17 @@ io.on('connection', function (socket) {
         }
     });
 
-    socket.on('disconnect', function(){
+    user.socket.on('disconnect', function(){
         users.pop(user);
     });
 
-    socket.on('fetchComments', function () {
-        sendComments(socket);
-    });
-
-    socket.on('newMessage', function (text, callback) {
+    user.socket.on('newMessage', function (text, callback) {
         fs.readFile('_messages.json', 'utf8', function(err, messages) {
             messages = JSON.parse(messages);
             messages.push({ author: user.id, text: text });
-            messages = messages.slice(-10);
+            //messages = messages.slice(-10);
             fs.writeFile('_messages.json', JSON.stringify(messages, null, 4), function (err) {
-                io.emit('messages', messages);
+                io.emit('newmessages');
                 callback(err);
             });
         });

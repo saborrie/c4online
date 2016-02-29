@@ -1,0 +1,114 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+.content {
+    height: 100%;
+    overflow: hidden;
+}
+
+.board {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.section {
+  padding: 8rem 0 7rem;
+  text-align: center;
+}
+
+.row {
+    margin: 0 auto;
+    text-align: center;
+    width: 100%;
+}
+.row:last-child {
+    margin-bottom: 1.5%;
+}
+
+.cell {
+    float: left;
+    border: 1px solid lightgray;
+    display: inline-block;
+    border-radius: 50%;
+    position: relative;
+    width: 13%;     /* desired width */
+    margin-top: 1.5%;
+    margin-left: 1.5%;
+
+}
+.cell:first-child {
+    margin-left: 0;
+}
+.cell:before{
+    content: "";
+    display: block;
+    padding-top: 100%;  /* initial ratio of 1:1*/
+}
+
+.cell.red {
+    background: #ff6666;
+}
+
+.cell.yellow {
+    background: #ffff66;
+}
+
+.message {
+    max-width: 60%;
+    display: inline-block;
+    border-radius: 16px;
+    padding: 8px 16px;
+    margin: 4px 0;
+    text-align: left;
+    line-height: 120%;
+    font-weight: 200;
+    clear: both;
+    float: left;
+    background: lightgray;
+}
+.message.received {
+    float: left;
+    background: #ff6666;
+    color: white;
+}
+.message.sent {
+    float: right;
+    background: #ffff66;
+}
+
+.main {
+    min-height: calc(100% - 65px);
+    max-height: calc(100% - 65px);
+    display: block;
+    overflow-y: auto;
+}
+
+.footer {
+    height: 65px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.messagebox {
+    max-height: 65px;
+    height: 65px;
+    padding: 6px 10px;
+    background-color: #fff;
+    border: none !important;
+    border-top: 1px solid lightgray !important;
+    outline: none !important;
+    box-shadow: none;
+    box-sizing: border-box;
+    width: 100%;
+    resize: none;
+    margin: 0;
+    vertical-align:middle;
+    display: inline-block;
+    overflow-y: auto;
+}

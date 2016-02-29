@@ -1,14 +1,22 @@
 <html>
     <head>
-        <title>Hello React</title>
+        <title>Connect 4 Online</title>
+
+        <!-- Mobile Specific Metas
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <script src="http://fb.me/react-0.12.2.js"></script>
         <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
         <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
-        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/skeleton.css">
+        <link rel="stylesheet" href="css/style.css">
+
     </head>
     <body>
         <div id="content"></div>
         <script src="/socket.io/socket.io.js"></script>
-        <script type="text/jsx" src="app.jsx"></script>
+        <script type="text/jsx" src="bundle.js"></script>
     </body>
 </html> 

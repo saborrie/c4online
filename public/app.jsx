@@ -1,3 +1,21 @@
+var classNames = require('classnames');
+
+var MessageList = React.createClass({
+    render: function () {
+        var messages = (<div>Loading messages...</div>);
+        if (this.props.messages) {
+            messages = this.props.messages.map(function (message) {
+                return (<Message message={message} />);
+            });
+        }
+        return (
+            <div className="messagelist">
+                {messages.reverse()}
+            </div>
+        );
+    }
+});
+
 var App = React.createClass({
     getInitialState: function () {
         return {
@@ -15,7 +33,9 @@ var App = React.createClass({
         this.socket.on('id', function (id) {
             that.setState({ id: id });
         });
-
+        this.socket.on('newmessages', function() {
+            that.socket.emit('fetchmessages');
+        });
         this.socket.on('messages', function (messages) {
             that.setState({ messages: messages });
         });
@@ -40,10 +60,18 @@ var App = React.createClass({
     },
     render: function() {
         return (
-            <div className="app">
-                <div>You are player {this.state.id}.</div>
-                <Board board={this.state.board} reset={this.reset} makeMove={this.makeMove}/>
-                <ChatSection messages={this.state.messages} sendMessage={this.sendMessage}/>
+            <div className="content">
+            <div className="main">
+                <div className="container">
+                    <div className={classNames("board-wrapper", "row")}>
+                        <Board board={this.state.board} reset={this.reset} makeMove={this.makeMove}/>
+                    </div>
+                    <MessageList messages={this.state.messages} />
+                </div>
+            </div>
+            <div className="footer">
+                <ChatForm sendMessage={this.sendMessage}/>
+            </div>
             </div>
         );
 
@@ -66,9 +94,15 @@ var Board = React.createClass({
             oc = function(c){ return function() { that.props.makeMove(c); }; };
 
             for(var row=0; row<6; row++) {
+                var line = [];
+
                 for(var column=0; column<7; column++) {
-                    board.unshift(<Hole clicked={oc(column)} colour={this.props.board[row][column]}/>);
+                    line.push(<Hole clicked={oc(column)} colour={this.props.board[row][column]}/>);
                 }
+
+                board.unshift(
+                    <div className="row">{line}</div>
+                );
             }
         }
 
@@ -87,45 +121,19 @@ var Hole = React.createClass({
     },
     render: function () {
         return (
-            <div onClick={this.handleClick} className="hole"><div className={this.props.colour}></div></div>
+            <div onClick={this.handleClick} className={classNames("cell", this.props.colour)}></div>
         );
     }
 });
 
-var ChatSection = React.createClass({
-    render: function () {
-        return (<div className="chatsection">
-            <h3>Connect 4 chat:</h3>
-            <ChatForm sendMessage={this.props.sendMessage}/>
-            <MessageList messages={this.props.messages}/>
-        </div>);
-    }
-});
 
 
-var MessageList = React.createClass({
-    render: function () {
-        var messages = (<div>Loading messages...</div>);
-        if (this.props.messages) {
-            messages = this.props.messages.map(function (message) {
-                return (<Message message={message} />);
-            });
-        }
-        return (
-            <div className="messageslist">
-                {messages.reverse()}
-            </div>
-        );
-    }
-});
 
 
 var Message = React.createClass({
     render: function () {
         return (
-            <div className="comment">
-                <div className="body">{this.props.message.author}: {this.props.message.text}</div>
-            </div>
+            <div className={classNames("message", this.props.message.colour)}>{this.props.message.text}</div>
         );
     }
 });
@@ -142,8 +150,8 @@ var ChatForm = React.createClass({
     },
     render: function () {
         return (
-            <form className="commentForm" onSubmit={this.handleSubmit}>
-                <input type="text" name="author" ref="text" placeholder="send a message" required /><br/>
+            <form className="container" onSubmit={this.handleSubmit}>
+                <input type="text" required ref="text"  className="messagebox" placeholder="Type a message...  (set to h-texth / 2)" />
             </form>
         );
     }
