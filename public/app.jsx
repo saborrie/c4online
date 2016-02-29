@@ -27,53 +27,73 @@ var App = React.createClass({
     componentDidMount: function () {
         var that = this;
         this.socket = io();
-        this.socket.on('board', function (board) {
-            that.setState({ board: board });
+        that.setState({game: false});
+        this.socket.on('game', function () {
+            that.setState({game: true});
+
+            that.socket.on('board', function (board) {
+                that.setState({ 
+                    board: board.map(function(row) {
+                        return row.map(function(cell) {
+                            switch(cell) {
+                                case that.state.id:
+                                    return "yellow";
+                                case 1-that.state.id:
+                                    return "red"
+                                default:
+                                    return null;
+                            }
+                        });
+                    })
+                });
+            });
+            that.socket.on('id', function (id) {
+                that.setState({ id: id });
+            });
+            // that.socket.on('newmessages', function() {
+            //     that.socket.emit('fetchmessages');
+            // });
+            that.socket.on('messages', function (messages) {
+                that.setState({ 
+                    messages: messages.map(function(message) {
+                        message.colour = message.author==that.state.id ? "sent" : "received";
+                        return message;
+                    })
+                });
+            });
         });
-        this.socket.on('id', function (id) {
-            that.setState({ id: id });
-        });
-        this.socket.on('newmessages', function() {
-            that.socket.emit('fetchmessages');
-        });
-        this.socket.on('messages', function (messages) {
-            that.setState({ messages: messages });
-        });
-        this.socket.emit('fetch');
     },
     sendMessage: function (text, callback) {
-        this.socket.emit('newMessage', text, function (err) {
-            if (err)
-                return console.error('New message error:', err);
-            callback();
-        });
+        this.socket.emit('newMessage', text);
     },
     reset: function() {
         this.socket.emit('reset');
     },
     makeMove: function (column, callback) {
-        this.socket.emit('newMove', {column: column}, function (err) {
-            if (err)
-                return console.error('New move error:', err);
-            callback();
-        });
+        this.socket.emit('newMove', {column: column});
     },
     render: function() {
-        return (
-            <div className="content">
-            <div className="main">
-                <div className="container">
-                    <div className={classNames("board-wrapper", "row")}>
-                        <Board board={this.state.board} reset={this.reset} makeMove={this.makeMove}/>
+        if(this.state.game) {
+            return (
+                <div className="content">
+                <div className="main">
+                    <div className="container">
+                        <div className={classNames("board-wrapper", "row")}>
+                            <Board board={this.state.board} reset={this.reset} makeMove={this.makeMove}/>
+                        </div>
+                        <MessageList messages={this.state.messages} />
                     </div>
-                    <MessageList messages={this.state.messages} />
                 </div>
-            </div>
-            <div className="footer">
-                <ChatForm sendMessage={this.sendMessage}/>
-            </div>
-            </div>
-        );
+                <div className="footer">
+                    <ChatForm sendMessage={this.sendMessage}/>
+                </div>
+                </div>
+            );
+        } else {
+            return (<div className="splash">Looking for a game</div>);
+        }
+
+        
 
     }
 });
@@ -144,9 +164,8 @@ var ChatForm = React.createClass({
         e.preventDefault();
         var that = this;
         var text = this.refs.text.getDOMNode().value;
-        this.props.sendMessage(text, function (err) {
-            that.refs.text.getDOMNode().value = '';
-        });
+        this.props.sendMessage(text);
+        that.refs.text.getDOMNode().value = '';
     },
     render: function () {
         return (
