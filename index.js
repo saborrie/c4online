@@ -140,7 +140,7 @@ io.on('connection', function (socket) {
     user = {
         id: usercounter++,
         socket: socket
-    };
+    };  
 
     user.socket.on('setNickname', function(nickname) {
         console.log(this);

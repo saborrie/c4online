@@ -4,7 +4,7 @@
   "description": "Connect 4 online game using node, socket.io and react",
   "main": "index.js",
   "scripts": {
-    "install": "browserify -t reactify ./public/app.jsx -o ./public/bundle.js",
+    "postinstall": "browserify -t reactify ./public/app.jsx -o ./public/bundle.js",
     "start": "node index.js"
   },
   "dependencies": {
@@ -12,7 +12,9 @@
     "ejs": "2.3.3",
     "express": "4.13.3",
     "semaphore": "^1.0.5",
-    "socket.io": "^1.4.5"
+    "socket.io": "^1.4.5",
+    "browserify": "^13.0.0",
+    "reactify": "^1.1.1"
   },
   "engines": {
     "node": "0.12.7"
@@ -24,8 +26,5 @@
   "keywords": [
     "connect4"
   ],
-  "license": "MIT",
-  "devDependencies": {
-    "reactify": "^1.1.1"
-  }
+  "license": "MIT"  
 }
