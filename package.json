@@ -4,6 +4,7 @@
   "description": "Connect 4 online game using node, socket.io and react",
   "main": "index.js",
   "scripts": {
+    "install": "browserify -t reactify ./public/app.jsx -o ./public/bundle.js",
     "start": "node index.js"
   },
   "dependencies": {
