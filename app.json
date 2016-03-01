@@ -1,8 +1,8 @@
 {
-  "name": "Node.js Getting Started",
-  "description": "A barebones Node.js app using Express 4",
-  "repository": "https://github.com/heroku/node-js-getting-started",
+  "name": "Connect 4 Online",
+  "description": "Connect 4 online game",
+  "repository": "https://github.com/saborrie/c4online",
   "logo": "http://node-js-sample.herokuapp.com/node.svg",
-  "keywords": ["node", "express", "static"],
+  "keywords": ["connect4"],
   "image": "heroku/nodejs"
 }

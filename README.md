@@ -1,3 +1,9 @@
+# compilation
+
+```
+browserify -t reactify .\public\app.jsx -o .\public\bundle.js
+```
+
 # node-js-getting-started
 
 A barebones Node.js app using [Express 4](http://expressjs.com/).

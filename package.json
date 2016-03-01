@@ -1,7 +1,7 @@
 {
-  "name": "node-js-getting-started",
-  "version": "0.1.5",
-  "description": "A sample Node.js app using Express 4",
+  "name": "connect-4-online",
+  "version": "0.0.1",
+  "description": "Connect 4 online game using node, socket.io and react",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -18,12 +18,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/heroku/node-js-getting-started"
+    "url": "https://github.com/saborrie/c4online"
   },
   "keywords": [
-    "node",
-    "heroku",
-    "express"
+    "connect4"
   ],
   "license": "MIT",
   "devDependencies": {

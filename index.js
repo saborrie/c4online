@@ -35,6 +35,7 @@ var createGame = function(user1, user2) {
 
     users = [user1, user2];
     turn = 0;
+    timer = 30;
 
     board = [];
     for(var i=0; i<6; i++) {
@@ -59,27 +60,21 @@ var createGame = function(user1, user2) {
     };
 
     users.forEach(function(user, userNumber) {
-        console.log(userNumber, user.id, user.socket.id);
-
-        users[userNumber].socket.emit("game");
-        users[userNumber].socket.emit('id', userNumber);
-
-        users[userNumber].socket.on('reset', function () {
-            board = [];
-            for(var i=0; i<6; i++) {
-                board[i] = [];
-                for(var j=0; j<7; j++) {
-                    board[i][j] = "E";
-                }
-            }
-            sendBoard();
+        users[userNumber].socket.emit("game", {
+            opponent: users[1-userNumber].nickname,
+            turncolour: turn,
+            turntime: timer
         });
+
+        users[userNumber].socket.emit('id', userNumber);
 
         users[userNumber].socket.on('newMove', function (move) {
 
             console.log("newmove", userNumber, turn);
 
             if(turn !== userNumber) return;
+
+            timer=30;
 
             for(var row=0; row<6; row++) {
                 if(board[row][move.column] == "E") {
@@ -106,6 +101,37 @@ var createGame = function(user1, user2) {
 
     sendBoard();
     sendMessages();
+
+    setInterval(function() {
+        timer = timer-1;
+        oldturn = turn;
+        if(timer==0){
+            for(var column=0; column<7; column++) {
+                for(var row=0; row<6; row++) {
+                    if(board[row][column] == "E") {
+                        board[row][column] = turn;
+                        console.log('sendBoard');
+                        console.log(board);
+                        sendBoard();
+                        turn = turn===0 ? 1 : 0;
+                        timer = 30;
+                        break;
+                    }
+                }
+                if(turn != oldturn) {
+                    break;
+                }
+            }
+        }
+
+        users.forEach(function(user, userNumber) {
+            users[userNumber].socket.emit('turn', {
+                turncolour: turn,
+                turntime: timer
+            });
+        });
+        
+    }, 1000);
 };
 
 io.on('connection', function (socket) {
@@ -116,25 +142,33 @@ io.on('connection', function (socket) {
         socket: socket
     };
 
-    console.log("user " + user.id + " looking for a game");
-    lookingForGame.take(function() {
-        waitingForOpponent.take(function() {
-            getWaiting(function(waiting) {
-                if(waiting !== null && waiting != user) {
-                    console.log("match made between " + waiting.id + " and " + user.id);
-                    createGame(user, waiting);
-                    setWaiting(null, function(){
-                        waitingForOpponent.leave();
-                    });
-                } else {
-                    setWaiting(user, function(){
-                        console.log("user " + user.id + " hosting and waiting for a match");
-                        waitingForOpponent.leave();
-                    });
-                }
-            });
+    user.socket.on('setNickname', function(nickname) {
+        console.log(this);
 
-            lookingForGame.leave();
+        if(user.nickname) return;
+        user.nickname = nickname;
+        console.log("user " + user.nickname + " looking for a game");
+        console.log("user " + user.id + " looking for a game");
+        
+        lookingForGame.take(function() {
+            waitingForOpponent.take(function() {
+                getWaiting(function(waiting) {
+                    if(waiting !== null && waiting != user) {
+                        console.log("match made between " + waiting.id + " and " + user.id);
+                        createGame(user, waiting);
+                        setWaiting(null, function(){
+                            waitingForOpponent.leave();
+                        });
+                    } else {
+                        setWaiting(user, function(){
+                            console.log("user " + user.id + " hosting and waiting for a match");
+                            waitingForOpponent.leave();
+                        });
+                    }
+                });
+
+                lookingForGame.leave();
+            });
         });
     });
 });
