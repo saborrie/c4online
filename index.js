@@ -3,7 +3,7 @@ var app = express();
 var path = require('path');
 var fs = require('fs');
 var lookingForGame = require('semaphore')(2);
-var waitingForOpponent = require('semaphore')(2);
+var waitingForOpponent = require('semaphore')(1);
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -36,6 +36,7 @@ var createGame = function(user1, user2) {
     users = [user1, user2];
     turn = 0;
     timer = 30;
+    result = 'E';
 
     board = [];
     for(var i=0; i<6; i++) {
@@ -59,6 +60,23 @@ var createGame = function(user1, user2) {
         });
     };
 
+    var sendResult = function () {
+        users.forEach(function(user, userNumber) {
+            user.socket.emit('result', result);
+        });
+    };
+
+    var makeMove = function(column) {
+        for(var row=0; row<6; row++) {
+            if(board[row][column] == "E") {
+                board[row][column] = turn;
+                turn = turn===0 ? 1 : 0;
+                return true;
+            }
+        }
+        return false;
+    };
+
     users.forEach(function(user, userNumber) {
         users[userNumber].socket.emit("game", {
             opponent: users[1-userNumber].nickname,
@@ -70,29 +88,22 @@ var createGame = function(user1, user2) {
 
         users[userNumber].socket.on('newMove', function (move) {
 
-            console.log("newmove", userNumber, turn);
-
-            if(turn !== userNumber) return;
-
-            timer=30;
-
-            for(var row=0; row<6; row++) {
-                if(board[row][move.column] == "E") {
-                    board[row][move.column] = userNumber;
-                    console.log('sendBoard');
-                    console.log(board);
+            if(turn == userNumber) {
+                if(makeMove(move.column)) {
+                    timer=30;
                     sendBoard();
-                    turn = turn===0 ? 1 : 0;
-                    break;
-                }
+                    result = checkBoardState(board);
+                    if(result != 'E') {
+                        sendResult();    
+                    }
+                }    
             }
+            
         });
 
         users[userNumber].socket.on('newMessage', function (text) {
-            console.log("user" + userNumber + " waiting to send message: " + text);
             sendingMessage.take(function() {
                 messages.push({ author: userNumber, text: text });
-                console.log("user" + userNumber + " sending message: " + text);
                 sendMessages();
                 sendingMessage.leave();
             });
@@ -105,20 +116,16 @@ var createGame = function(user1, user2) {
     setInterval(function() {
         timer = timer-1;
         oldturn = turn;
-        if(timer==0){
+
+        if(timer===0){
             for(var column=0; column<7; column++) {
-                for(var row=0; row<6; row++) {
-                    if(board[row][column] == "E") {
-                        board[row][column] = turn;
-                        console.log('sendBoard');
-                        console.log(board);
-                        sendBoard();
-                        turn = turn===0 ? 1 : 0;
-                        timer = 30;
-                        break;
+                if(makeMove(column)) {
+                    timer=30;
+                    sendBoard();
+                    result = checkBoardState(board);
+                    if(result != 'E') {
+                        sendResult();    
                     }
-                }
-                if(turn != oldturn) {
                     break;
                 }
             }
@@ -143,25 +150,20 @@ io.on('connection', function (socket) {
     };  
 
     user.socket.on('setNickname', function(nickname) {
-        console.log(this);
 
         if(user.nickname) return;
         user.nickname = nickname;
-        console.log("user " + user.nickname + " looking for a game");
-        console.log("user " + user.id + " looking for a game");
         
         lookingForGame.take(function() {
             waitingForOpponent.take(function() {
                 getWaiting(function(waiting) {
                     if(waiting !== null && waiting != user) {
-                        console.log("match made between " + waiting.id + " and " + user.id);
                         createGame(user, waiting);
                         setWaiting(null, function(){
                             waitingForOpponent.leave();
                         });
                     } else {
                         setWaiting(user, function(){
-                            console.log("user " + user.id + " hosting and waiting for a match");
                             waitingForOpponent.leave();
                         });
                     }
@@ -172,3 +174,16 @@ io.on('connection', function (socket) {
         });
     });
 });
+
+function checkBoardState(b) {
+    if(-1 != b[5].indexOf('E')) return 'D';
+    for(var r=0; r<6; r++) {
+        for(var c=0; c<7; c++) {
+            if(c<4 &&           b[r][c] ==  b[r][c+1] ==    b[r][c+2] ==    b[r][c+3])      return b[r][c];
+            if(r<3 &&           b[r][c] ==  b[r+1][c] ==    b[r+2][c] ==    b[r+3][c])      return b[r][c];
+            if(c<4 && r<3 &&    b[r][c] ==  b[r+1][c+1] ==  b[r+1][c+2] ==  b[r+1][c+3])    return b[r][c];
+            if(c<4 && r>2 &&    b[r][c] ==  b[r-1][c+1] ==  b[r-1][c+2] ==  b[r-1][c+3])    return b[r][c];
+        }
+    }
+    return 'E';
+}

@@ -4,17 +4,28 @@
   "description": "Connect 4 online game using node, socket.io and react",
   "main": "index.js",
   "scripts": {
-    "postinstall": "browserify -t reactify ./public/app.jsx -o ./public/bundle.js",
-    "start": "node index.js"
+    "postinstall": "gulp build",
+    "start": "node server/main"
   },
   "dependencies": {
+    "body-parser": "^1.15.0",
+    "browserify": "^13.0.0",
     "classnames": "^2.2.3",
     "ejs": "2.3.3",
     "express": "4.13.3",
+    "gulp": "^3.9.1",
+    "gulp-bro": "^0.2.0",
+    "gulp-rename": "^1.2.2",
+    "nedb": "^1.8.0",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "reactify": "^1.1.1",
     "semaphore": "^1.0.5",
+    "simple-ajax": "^2.4.0",
     "socket.io": "^1.4.5",
-    "browserify": "^13.0.0",
-    "reactify": "^1.1.1"
+    "socket.io-client": "^1.4.5",
+    "socketio-auth": "0.0.5",
+    "uglifyify": "^3.0.1"
   },
   "engines": {
     "node": "0.12.7"
@@ -26,5 +37,5 @@
   "keywords": [
     "connect4"
   ],
-  "license": "MIT"  
+  "license": "MIT"
 }

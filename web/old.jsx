@@ -1,4 +1,8 @@
+var io = require('socket.io-client');
+var React = require('react');
+var ReactDOM = require('react-dom');
 var classNames = require('classnames');
+
 
 var MessageList = React.createClass({
     render: function () {
@@ -50,6 +54,11 @@ var App = React.createClass({
     componentDidMount: function () {
         var that = this;
         this.socket = io();
+        this.socket.emit('authenticate', {
+            username: 'steve',
+            password: 'password'
+        });
+
         that.setState({game: false});
         this.socket.on('game', function (game) {
             that.setState({
@@ -228,7 +237,7 @@ var ChatForm = React.createClass({
     }
 });
 
-React.render(
+ReactDOM.render(
     <App/>,
     document.getElementById('content')
 );

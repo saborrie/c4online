@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Raleway:400,700,300);
+@import url(https://fonts.googleapis.com/css?family=Raleway:400,700,300);
 
 * {
     box-sizing: border-box;
@@ -7,6 +7,45 @@
 
 html, body {
     height: 100%;
+}
+
+.title {
+    text-transform: uppercase;
+    font-size: 1.4rem;
+    letter-spacing: .2rem;
+    font-weight: 600;
+}
+
+.menupage {
+    width: 95%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 100px 0 50px;
+}
+
+.menupage input {
+    display: inline-block;
+}
+
+.formError {
+    color: red;
+    float: right;
+}
+
+button, a {
+    cursor: pointer;
+}
+
+button[disabled], button[disabled]:hover {
+    background:#ccc;
+    border-color: #ccc;
+    text-shadow:none;
+}
+
+.profileinfo {
+    margin: 0 auto;
+    text-align: center;
+    padding-bottom: 50px;
 }
 
 .splash {
@@ -24,7 +63,7 @@ html, body {
 
 #content {
     height: 100%;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 .board {
@@ -38,12 +77,12 @@ html, body {
   text-align: center;
 }
 
-.row {
+.board-row {
     margin: 0 auto;
     text-align: center;
     width: 100%;
 }
-.row:last-child {
+.board-row:last-child {
     margin-bottom: 1.5%;
 }
 
